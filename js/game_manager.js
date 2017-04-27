@@ -30,36 +30,51 @@ GameManager.prototype.runTheScript = function () {
 
   setTimeout(function () {
     // If we tried a move and nothing 
+
     if (self.didNotMove) {
 
       self.inputManager.emit("move", 1); // Right
+      //console.log("1.1");
 
       // If any of the last row cells are empty
       if (self.grid.cells[0][3] === null || self.grid.cells[1][3] === null || self.grid.cells[2][3] === null || self.grid.cells[3][3] === null) {
         self.inputManager.emit("move", 3); // Left
+        //console.log("1.2.1");
       }
       else {
         self.inputManager.emit("move", 2); // Down
+        //console.log("1.2.2");
+        self.didNotMove = false;
       }
     }
     else {
       // If any of the last row cells are empty
       if (self.grid.cells[0][3] === null || self.grid.cells[1][3] === null || self.grid.cells[2][3] === null || self.grid.cells[3][3] === null) {
         self.inputManager.emit("move", 2); // Down
-        
+        //console.log("2.1.1");
+
         if (self.didNotMove) {
           self.inputManager.emit("move", 3); // Left
+          //console.log("2.1.2");
         }
       }
-      // Default behavior
+      
       else {
+
         // If the first block on the 3rd row is equal to any block on the last row
-        if (self.grid.cells[0][2] === self.grid.cells[1][3]) {
-          console.log("moveable");
+        if (self.grid.timeToCombineDiagonally()) {
+          self.inputManager.emit("move", 1); // Right
+          self.inputManager.emit("move", 2); // Down 
+          self.inputManager.emit("move", 3); // Left 
         }
+        else if (self.grid.timeToCombineDown) {
+          self.inputManager.emit("move", 2); // Down
+        }
+        // Default behavior
         else {
           self.inputManager.emit("move", 2); // Down
           self.inputManager.emit("move", 3); // Left
+          //console.log("2.2");
         }
       }
     }
@@ -235,13 +250,13 @@ GameManager.prototype.move = function (direction) {
     if (!this.movesAvailable()) {
       this.over = true; // Game over!
     }
-    
+
     this.previousGrid = this.grid;
     this.actuate();
     this.didNotMove = false;
   }
   else {
-    self.didNotMove= true;
+    self.didNotMove = true;
   }
 };
 

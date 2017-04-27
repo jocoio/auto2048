@@ -54,6 +54,18 @@ Grid.prototype.availableCells = function () {
   return cells;
 };
 
+Grid.prototype.availableCellsInRow = function (row) {
+  var cells = [];
+
+  this.eachCellInRow(function (x, y, tile) {
+    if (!tile) {
+      cells.push({ x: x, y: y });
+    }
+  }, row);
+
+  return cells;
+};
+
 // Call callback for every cell
 Grid.prototype.eachCell = function (callback) {
   for (var x = 0; x < this.size; x++) {
@@ -63,9 +75,21 @@ Grid.prototype.eachCell = function (callback) {
   }
 };
 
+// Call callback for every cell in a given row
+Grid.prototype.eachCellInRow = function (callback, row) {
+  for (var x = 0; x < this.size; x++) {
+    callback(x, row, this.cells[x][row]);
+  }
+};
+
 // Check if there are any cells available
 Grid.prototype.cellsAvailable = function () {
   return !!this.availableCells().length;
+};
+
+// Shows how many cells are available in a given row
+Grid.prototype.cellsAvailableInRow = function (row) {
+  return this.availableCellsInRow(row).length;
 };
 
 // Check if the specified cell is taken
@@ -115,3 +139,29 @@ Grid.prototype.serialize = function () {
     cells: cellState
   };
 };
+
+Grid.prototype.timeToCombineDiagonally = function () {
+  for (var x1 = 0; x1 < this.size - 1; x1++) {
+    for (var x2 = x1 + 1; x2 < this.size; x2++) {
+      if (!this.cellAvailable({ x: x1, y: 2 })) {
+        if ((this.cellContent({ x: x1, y: 2 }).value === this.cellContent({ x: x2, y: 3 }).value) && (this.cellsAvailableInRow(2) === x2 - x1)) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+Grid.prototype.timeToCombineDown = function () {
+  for (var x1 = 0; x1 < this.size; x1++) {
+    if (!this.cellAvailable({ x: x1, y: 2 })) {
+      if (this.cellContent({ x: x1, y: 2 }).value === this.cellContent({ x: x1, y: 3 }).value) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
